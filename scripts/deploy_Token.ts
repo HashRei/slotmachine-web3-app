@@ -2,7 +2,7 @@ import { ethers } from "hardhat"
 
 async function main() {
   const SMT = await ethers.getContractFactory("SMT")
-  const smt = await SMT.deploy()
+  const smt = await SMT.deploy(10000)
 
   await smt.deployed()
 

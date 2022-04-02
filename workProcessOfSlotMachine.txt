@@ -1,0 +1,33 @@
+Userside:
+
+    Step 1:
+        Buy SMT tokens on a Swap( add token address to wallet, exchange BNB for SMT)
+    
+    Step 2:
+        Pay the slotmachine X tokens to make it spin X times
+    
+    Step 3:
+        Let it spin
+
+    Step 4:
+        Result: Win - get Y amount of SNT tokens
+                Lose - Nothing happens, if more tokens are available allowe new spins
+
+Systemside:
+
+    *Pay the Verifiable Random Function of Chainlink with LINK tokens:  Convert BNB/SMT to LINK to pay the function call
+        *Once for the spin
+        *Once for the win process if it happens 
+
+    *Add the remaining SMT amount to the jackpot balance (do not let win the whole jackpot balance, to have some reserve if needed)
+
+    *after a while burn some SMT tokens
+
+    *Possibility to withdraw the remaining SMTs from the machine if the person does not want to play anymore
+
+
+
+
+
+
+

@@ -14,8 +14,8 @@ contract SMT is ERC20 {
   // BSC Testnet LINK token contract address
   address public LINK_ADDRESS = 0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06;
 
-  // BSC Testnet Chainlink Verifiable Random Function coordinator contract address
-  address public VRF_COORDINATOR = 0x6A2AAd07396B36Fe02a22b33cf443582f682c82f;
+  // BSC Testnet address of the slot machine comtract
+  address public SLOT_MACHINE_ADDRESS = 0x6A2AAd07396B36Fe02a22b33cf443582f682c82f;
 
   /** SEMI-CONSTANTS **/
 
@@ -52,16 +52,9 @@ contract SMT is ERC20 {
       _smtAmount,
       0, // Accept any amount of LINK
       path,
-      VRF_COORDINATOR, // Recipient of the output tokensis the VRF contract
+      SLOT_MACHINE_ADDRESS, // Recipient of the output tokens
       block.timestamp // Unix timestamp after which the transaction will revert
     );
-  }
-
-  // Should top-up the subscription of the VRF contract
-  //TODO: Possible issue with onlyOwner
-  // TOD
-  function _topUpSubscription(uint256 _amount) internal pure {
-    address(VRF_COORDINATOR).topUpSubscription(_amount);
   }
 
   // Add _amount of SMT tokens to the SlotMachine

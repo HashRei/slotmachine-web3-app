@@ -5,9 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "../interfaces/IUniswapV2Router02.sol";
 import "../interfaces/IUniswapV2Factory.sol";
 
-//TODO: lokks to connect 
-// import "../interfaces/IVRFv2SubscriptionManager.sol";
-
 contract SMT is ERC20 {
   /** CONSTANTS **/
 
@@ -20,7 +17,7 @@ contract SMT is ERC20 {
   /** SEMI-CONSTANTS **/
 
   IUniswapV2Router02 public pancakeRouter;
-  // IVRFv2SubscriptionManager public vrfCoordinator;
+
   address public pancakeSmtBnbPair;
 
   /** VARIABLES **/

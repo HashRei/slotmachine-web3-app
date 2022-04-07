@@ -9,9 +9,9 @@ contract SMT is ERC20 {
   /** CONSTANTS **/
 
   // BSC Testnet LINK token contract address
-  address public LINK_ADDRESS = 0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06;
+  address public LINK_TOKEN_ADDRESS = 0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06;
 
-  // BSC Testnet address of the slot machine comtract
+  // BSC Testnet address of the slot machine contract
   address public SLOT_MACHINE_ADDRESS = 0x6A2AAd07396B36Fe02a22b33cf443582f682c82f;
 
   /** SEMI-CONSTANTS **/
@@ -38,10 +38,11 @@ contract SMT is ERC20 {
   /** INTERNAL METHODS **/
 
   // Swaps "_smtAmount" SMT for LINK
+  // Send LINK to the SlotMachine contract
   function _swapSmtForLink(uint256 _smtAmount) internal {
     address[] memory path = new address[](2);
     path[0] = address(this);
-    path[1] = LINK_ADDRESS;
+    path[1] = LINK_TOKEN_ADDRESS;
 
     _approve(address(this), address(pancakeRouter), _smtAmount);
 

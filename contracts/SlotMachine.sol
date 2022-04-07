@@ -31,15 +31,12 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
   // Cannot exceed VRFCoordinatorV2.MAX_NUM_WORDS.
   uint32 NUM_WORDS = 1;
 
-  uint16 GAS_PRICE = 10.5; // 10.5 Gwei
-
-  uint16 VERIFICATION_GAS = 200000; // Unit is gas
-
-  // https://docs.chain.link/docs/chainlink-vrf/#subscription-billing
-  uint256 TOTAL_GAS_COST = GAS_PRICE * (VERIFICATION_GAS + CALLBACK_GAS_LIMIT);
-
-  // https://docs.chain.link/docs/vrf-contracts/#configurations
-  uint16 LINK_PREMIUM = 0.005; // Unit is LINK
+  // Subsciption fee payed to request a random value
+  // contains gas price on BSC Tesnet (= 10.5 gwei) https://explorer.bitquery.io/bsc_testnet/gas,
+  // verification price(=200,000 gas) https://docs.chain.link/docs/chainlink-vrf/#subscription-billing,
+  // callback gas limit (=100,000)
+  // and link premium value(=0.005 LINK) https://docs.chain.link/docs/vrf-contracts/#configurations
+  uint256 internal SUBSCRIPTION_FEE = 0.1 * 10**18; // 0.1 LINK - 0.092 would be enough but better safe then sorry
 
   /** VARIABLES **/
 
@@ -95,10 +92,14 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
   // Assumes this contract owns link
   // Sends fund the subscription contract and request a random value
   function fundAndRequestRandomWords() external onlyOwner {
-    // LINK cost hestimation times two to be on the safe side
-    uint256 memory _amount = (TOTAL_GAS_COST + LINK_PREMIUM) * 2;
+    require(
+      LINKTOKEN.balanceOf(address(this)) >= SUBSCRIPTION_FEE,
+      "Not enough LINK - fill this contract with LINK"
+    );
+
     // Sends LINK tokens from this contract to the COORDINATOR/subscription that allows the requesting of the random number
-    LINKTOKEN.transferAndCall(address(COORDINATOR), _amount, abi.encode(s_subscriptionId));
+    LINKTOKEN.transferAndCall(address(COORDINATOR), SUBSCRIPTION_FEE, abi.encode(s_subscriptionId));
+
     // Will revert if subscription is not set and funded.
     s_requestId = COORDINATOR.requestRandomWords(
       KEY_HASH,

@@ -55,9 +55,10 @@ contract SMT is ERC20 {
     );
   }
 
-
-   // Manually swap
-  function manualSwapSmtForLink(uint256 _smtAmount) external returns(bool){
+  /** MAIN METHODS **/
+  
+  // Manually swap
+  function manualSwapSmtForLink(uint256 _smtAmount) external returns (bool) {
     // TODO: Add protective structure
 
     // Perform the swap

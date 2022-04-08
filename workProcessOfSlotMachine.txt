@@ -17,7 +17,7 @@ Systemside:
 
     *Pay the Verifiable Random Function of Chainlink with LINK tokens:  Convert BNB/SMT to LINK to pay the function call
         *Once for the spin
-        *Once for the win process if it happens 
+        ~~*Once for the win process if it happens~~ For now if the player wins he will get 3 SMT Tokens
 
     *Add the remaining SMT amount to the jackpot balance (do not let win the whole jackpot balance, to have some reserve if needed)
 

@@ -10,48 +10,47 @@ import "../interfaces/IERC20.sol";
 import "../interfaces/ISMT.sol";
 
 contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
-  VRFCoordinatorV2Interface COORDINATOR;
-  LinkTokenInterface LINKTOKEN;
+  VRFCoordinatorV2Interface public COORDINATOR;
+  LinkTokenInterface public LINKTOKEN;
 
   /** VRF CONSTANTS **/
 
   // BSC Testnet LINK token contract address
-  address public LINK_TOKEN_ADDRESS = 0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06;
+  address public constant LINK_TOKEN_ADDRESS = 0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06;
 
   // BSC Testnet Chainlink Verifiable Random Function coordinator contract address
-  address public VRF_COORDINATOR = 0x6A2AAd07396B36Fe02a22b33cf443582f682c82f;
+  address public constant VRF_COORDINATOR = 0x6A2AAd07396B36Fe02a22b33cf443582f682c82f;
 
   // The gas lane to use, which specifies the maximum gas price to bump to.
-  bytes32 KEY_HASH = 0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314;
+  bytes32 public constant KEY_HASH = 0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314;
 
   // Maximum amount of gas  that can be spend on the callback request
-  uint32 CALLBACK_GAS_LIMIT = 100000; // Unit is gas
+  uint32 public constant CALLBACK_GAS_LIMIT = 100000; // Unit is gas
 
-  uint16 REQUEST_CONFIRMATIONS = 3;
+  uint16 public constant REQUEST_CONFIRMATIONS = 3;
 
   // For this example, retrieve 1 random value in one request.
   // Cannot exceed VRFCoordinatorV2.MAX_NUM_WORDS.
-  uint32 NUM_WORDS = 1;
+  uint32 public constant NUM_WORDS = 1;
 
   // Subsciption fee payed to request a random value
   // contains gas price on BSC Tesnet (= 10.5 gwei) https://explorer.bitquery.io/bsc_testnet/gas,
   // verification price(=200,000 gas) https://docs.chain.link/docs/chainlink-vrf/#subscription-billing,
   // callback gas limit (=100,000)
   // and link premium value(=0.005 LINK) https://docs.chain.link/docs/vrf-contracts/#configurations
-  uint256 internal SUBSCRIPTION_FEE = 0.1 * 10**18; // 0.1 LINK - 0.092 would be enough but better safe then sorry
+  uint256 internal constant SUBSCRIPTION_FEE = 0.1 * 10**18; // 0.1 LINK - 0.092 would be enough but better safe then sorry
 
   /** VARIABLES **/
 
   address public smt;
-  address public player;
   mapping(address => uint256) public tokenBalanceToPlay; // Variables that holds the SMT token that the player has injected in the machine, can be more then 1
 
   /**  VRF VARIABLES **/
 
   uint256 public randomResult;
-  uint256 public s_requestId;
-  uint64 public s_subscriptionId;
-  address s_owner; // Address of the smart contract owner
+  uint256 public requestId;
+  uint64 public subscriptionId;
+  address public s_owner; // Address of the smart contract owner
 
   /**  Events **/
   event AddedLiquidity(uint256 smtAmount, uint256 bnbAmount);
@@ -63,7 +62,6 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     COORDINATOR = VRFCoordinatorV2Interface(VRF_COORDINATOR); // Processes the random number request and determines the final charge of it
     LINKTOKEN = LinkTokenInterface(LINK_TOKEN_ADDRESS);
     s_owner = msg.sender;
-    player = msg.sender;
     // Create a new subscription the contract is deployed
     createNewSubscription();
   }
@@ -74,7 +72,6 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
 
   // Withdraw all the assigned SMT tokens from the current player
   function withdrawAllTokens() public {
-    // require(msg.sender == player, "You are not the player");
     require(tokenBalanceToPlay[msg.sender] > 0, "No SMT tokens in the machine");
 
     // State change before transfer, to avoid reantrancy attack possibilty
@@ -127,16 +124,16 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
   function fundAndRequestRandomWords() internal onlyOwner {
     require(
       LINKTOKEN.balanceOf(address(this)) >= SUBSCRIPTION_FEE,
-      "Not enough LINK - fill this contract with LINK"
+      "Not enough LINK on this contract"
     );
 
     // Sends LINK tokens from this contract to the COORDINATOR/subscription that allows the requesting of the random number
-    LINKTOKEN.transferAndCall(address(COORDINATOR), SUBSCRIPTION_FEE, abi.encode(s_subscriptionId));
+    LINKTOKEN.transferAndCall(address(COORDINATOR), SUBSCRIPTION_FEE, abi.encode(subscriptionId));
 
     // Will revert if subscription is not set and funded.
-    s_requestId = COORDINATOR.requestRandomWords(
+    requestId = COORDINATOR.requestRandomWords(
       KEY_HASH,
-      s_subscriptionId,
+      subscriptionId,
       REQUEST_CONFIRMATIONS,
       CALLBACK_GAS_LIMIT,
       NUM_WORDS
@@ -156,25 +153,25 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     // Create a subscription with a new subscription ID.
     address[] memory consumers = new address[](1);
     consumers[0] = address(this);
-    s_subscriptionId = COORDINATOR.createSubscription();
+    subscriptionId = COORDINATOR.createSubscription();
     // Add this contract as a consumer of its own subscription.
-    COORDINATOR.addConsumer(s_subscriptionId, consumers[0]);
+    COORDINATOR.addConsumer(subscriptionId, consumers[0]);
   }
 
   function addConsumer(address consumerAddress) external onlyOwner {
     // Add a consumer contract to the subscription.
-    COORDINATOR.addConsumer(s_subscriptionId, consumerAddress);
+    COORDINATOR.addConsumer(subscriptionId, consumerAddress);
   }
 
   function removeConsumer(address consumerAddress) external onlyOwner {
     // Remove a consumer contract from the subscription.
-    COORDINATOR.removeConsumer(s_subscriptionId, consumerAddress);
+    COORDINATOR.removeConsumer(subscriptionId, consumerAddress);
   }
 
   function cancelSubscription(address receivingWallet) external onlyOwner {
     // Cancel the subscription and send the remaining LINK to a wallet address.
-    COORDINATOR.cancelSubscription(s_subscriptionId, receivingWallet);
-    s_subscriptionId = 0;
+    COORDINATOR.cancelSubscription(subscriptionId, receivingWallet);
+    subscriptionId = 0;
   }
 
   // Transfer this contract's funds to an address.

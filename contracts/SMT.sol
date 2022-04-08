@@ -9,10 +9,10 @@ contract SMT is ERC20 {
   /** CONSTANTS **/
 
   // BSC Testnet LINK token contract address
-  address public LINK_TOKEN_ADDRESS = 0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06;
+  address public constant LINK_TOKEN_ADDRESS = 0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06;
 
   // BSC Testnet address of the slot machine contract
-  address public SLOT_MACHINE_ADDRESS = 0x6A2AAd07396B36Fe02a22b33cf443582f682c82f;
+  address public constant SLOT_MACHINE_ADDRESS = 0x6A2AAd07396B36Fe02a22b33cf443582f682c82f;
 
   /** SEMI-CONSTANTS **/
 
@@ -56,7 +56,7 @@ contract SMT is ERC20 {
   }
 
   /** MAIN METHODS **/
-  
+
   // Manually swap
   function manualSwapSmtForLink(uint256 _smtAmount) external returns (bool) {
     // TODO: Add protective structure

@@ -72,16 +72,36 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
 
   receive() external payable {}
 
-  // Withdraw all the SMT tokens from the current player
-  function withdrawAllTokens() public nonReentrant {
-    require(msg.sender == player, "You are not the player");
+  // Withdraw all the assigned SMT tokens from the current player
+  function withdrawAllTokens() public {
+    // require(msg.sender == player, "You are not the player");
     require(tokenBalanceToPlay[msg.sender] > 0, "No SMT tokens in the machine");
 
-    //Send SMT tokens from the player which are in the machine to the players wallet
+    // State change before transfer, to avoid reantrancy attack possibilty
+    tokenBalanceToPlay[msg.sender] = 0;
 
+    // Send SMT tokens assigned to the player in the machine to the players wallet
     IERC20(smt).transfer(msg.sender, tokenBalanceToPlay[msg.sender]);
   }
 
+  function withdrawTokens(uint256 _amount) public {
+    require(tokenBalanceToPlay[msg.sender] >= _amount, "Too much tokens to withdraw");
+
+    tokenBalanceToPlay[msg.sender] -= _amount;
+
+    // Send SMT tokens assigned to the player in the machine to the players wallet
+    IERC20(smt).transfer(msg.sender, _amount);
+  }
+
+  // Add SMT tokens to the SlotMachine contract
+  function addTokens(uint256 _amount) public {
+    require(_amount > 0, "Amount has to be bigger than 0");
+    require(IERC20(smt).balanceOf(msg.sender) >= _amount, "You don't have enough SMT tokens");
+
+    tokenBalanceToPlay[msg.sender] += _amount;
+
+    IERC20(smt).transfer(address(this), _amount);
+  }
 
   // Get a random value from Chainlink VRF and check if the player has won
   function spin() public payable {

@@ -2,10 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin-contracts/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/ISMT.sol";
 
 contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
   VRFCoordinatorV2Interface COORDINATOR;
@@ -41,7 +43,6 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
   /** VARIABLES **/
 
   address public smt;
-  uint256 public jackpotBalance;
   address public player;
   mapping(address => uint256) public tokenBalanceToPlay; // Variables that holds the SMT token that the player has injected in the machine, can be more then 1
 
@@ -54,10 +55,11 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
 
   /**  Events **/
   event AddedLiquidity(uint256 smtAmount, uint256 bnbAmount);
+  event SpinResult(bool result);
 
   /** CONSTRUCTOR **/
 
-  constructor() {
+  constructor() VRFConsumerBaseV2(VRF_COORDINATOR) {
     COORDINATOR = VRFCoordinatorV2Interface(VRF_COORDINATOR); // Processes the random number request and determines the final charge of it
     LINKTOKEN = LinkTokenInterface(LINK_TOKEN_ADDRESS);
     s_owner = msg.sender;
@@ -80,18 +82,29 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     IERC20(smt).transfer(msg.sender, tokenBalanceToPlay[msg.sender]);
   }
 
+
   // Get a random value from Chainlink VRF and check if the player has won
   function spin() public payable {
     require(tokenBalanceToPlay[msg.sender] >= 1, "Token balance too low");
-
     tokenBalanceToPlay[msg.sender] -= 1;
+    // Swap 1 SMT token for LINK, the swapped LINK is send to this contract
+    ISMT(smt).manualSwapSmtForLink(1);
+    // Random number request process, value is stored in randomResult
+    fundAndRequestRandomWords();
+
+    if (randomResult == 1) {
+      tokenBalanceToPlay[msg.sender] += 3;
+      emit SpinResult(true);
+    } else {
+      emit SpinResult(false);
+    }
   }
 
   /** VRF METHODS **/
 
   // Assumes this contract owns link
   // Sends fund the subscription contract and request a random value
-  function fundAndRequestRandomWords() external onlyOwner {
+  function fundAndRequestRandomWords() internal onlyOwner {
     require(
       LINKTOKEN.balanceOf(address(this)) >= SUBSCRIPTION_FEE,
       "Not enough LINK - fill this contract with LINK"

@@ -55,6 +55,17 @@ contract SMT is ERC20 {
     );
   }
 
+
+   // Manually swap
+  function manualSwapSmtForLink(uint256 _smtAmount) external returns(bool){
+    // TODO: Add protective structure
+
+    // Perform the swap
+    _swapSmtForLink(_smtAmount);
+
+    return true;
+  }
+
   // Add _amount of SMT tokens to the SlotMachine
   function setInSlotMachine(address _account, uint256 _amount) public {
     inSlotMachine[_account] += _amount;

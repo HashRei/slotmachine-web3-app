@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "../interfaces/IUniswapV2Router02.sol";
@@ -67,18 +67,18 @@ contract SMT is ERC20 {
     return true;
   }
 
-  // Add _amount of SMT tokens to the SlotMachine
-  function setInSlotMachine(address _account, uint256 _amount) public {
-    inSlotMachine[_account] += _amount;
-  }
+  // // Add _amount of SMT tokens to the SlotMachine
+  // function setInSlotMachine(address _account, uint256 _amount) public {
+  //   inSlotMachine[_account] += _amount;
+  // }
 
-  // Remove _amount of SMT tokens from the SlotMachine
-  function removeInSlotMachine(address _account, uint256 _amount) public {
-    inSlotMachine[_account] -= _amount;
-  }
+  // // Remove _amount of SMT tokens from the SlotMachine
+  // function removeInSlotMachine(address _account, uint256 _amount) public {
+  //   inSlotMachine[_account] -= _amount;
+  // }
 
-  // Remove all the SMT tokens from the SlotMachine
-  function removeAllInSlotMachine(address _account) public {
-    inSlotMachine[_account] = 0;
-  }
+  // // Remove all the SMT tokens from the SlotMachine
+  // function removeAllInSlotMachine(address _account) public {
+  //   inSlotMachine[_account] = 0;
+  // }
 }

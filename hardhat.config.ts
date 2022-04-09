@@ -16,7 +16,7 @@ if (!mnemonic) console.log("Missing mnemonic");
  */
 export default {
   solidity: {
-    version: "0.8.0",
+    version: "0.8.4",
     settings: {
       optimizer: {
         enabled: true,
@@ -25,6 +25,8 @@ export default {
     },
   },
   networks: {
+    hardhat: {
+    },
     bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,

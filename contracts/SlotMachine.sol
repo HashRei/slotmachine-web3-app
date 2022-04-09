@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -58,10 +58,11 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
 
   /** CONSTRUCTOR **/
 
-  constructor() VRFConsumerBaseV2(VRF_COORDINATOR) {
+  constructor(address _smt) VRFConsumerBaseV2(VRF_COORDINATOR) {
     COORDINATOR = VRFCoordinatorV2Interface(VRF_COORDINATOR); // Processes the random number request and determines the final charge of it
     LINKTOKEN = LinkTokenInterface(LINK_TOKEN_ADDRESS);
     s_owner = msg.sender;
+    smt = _smt;
     // Create a new subscription the contract is deployed
     createNewSubscription();
   }
@@ -110,9 +111,11 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     fundAndRequestRandomWords();
 
     if (randomResult == 1) {
+      // Success case
       tokenBalanceToPlay[msg.sender] += 3;
       emit SpinResult(true);
     } else {
+      // Loss case
       emit SpinResult(false);
     }
   }
@@ -122,10 +125,7 @@ contract SlotMachine is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
   // Assumes this contract owns link
   // Sends fund the subscription contract and request a random value
   function fundAndRequestRandomWords() internal onlyOwner {
-    require(
-      LINKTOKEN.balanceOf(address(this)) >= SUBSCRIPTION_FEE,
-      "Not enough LINK on this contract"
-    );
+    require(LINKTOKEN.balanceOf(address(this)) >= SUBSCRIPTION_FEE, "Not enough LINK on this contract");
 
     // Sends LINK tokens from this contract to the COORDINATOR/subscription that allows the requesting of the random number
     LINKTOKEN.transferAndCall(address(COORDINATOR), SUBSCRIPTION_FEE, abi.encode(subscriptionId));

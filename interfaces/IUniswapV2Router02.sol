@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Uniswap V2
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 interface IUniswapV2Router02 {
   function swapExactTokensForTokensSupportingFeeOnTransferTokens(
